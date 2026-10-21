@@ -1,0 +1,296 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
+@model List<PlaceModel>
+
+@{
+    ViewData["Title"] = "Discover Places";
+    var savedPlaceIds = ViewBag.SavedPlaceIds as List<int> ?? new List<int>();
+    var likedPlaceIds = ViewBag.LikedPlaceIds as List<int> ?? new List<int>();
+}
+
+<style>
+    :root {
+        --primary-green: #157347;
+        --accent-gold: #f59e0b;
+        --glass-bg: rgba(255, 255, 255, 0.85);
+    }
+
+    /* Main card container */
+    .place-card {
+        height: 100%;
+        min-height: 450px;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #fffff9;
+        border: 1px solid #f1f5f9;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+        .place-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+    .image-wrapper {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+    }
+
+    .place-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+    }
+
+    .place-card:hover img {
+        transform: scale(1.1);
+    }
+
+    .category-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(8px);
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--primary-green);
+        z-index: 2;
+    }
+
+    .action-overlay {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 2;
+    }
+
+    .circle-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--glass-bg);
+        backdrop-filter: blur(8px);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+        .circle-btn:hover {
+            transform: scale(1.1);
+            background: #fff;
+        }
+
+    .place-card .card-body {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .place-title {
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: #1e293d;
+        margin-bottom: 4px;
+    }
+
+    .location-text {
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 12px;
+    }
+
+    .features-list {
+        font-size: 0.8rem;
+        color: #475569;
+        overflow: hidden;
+        min-height: 2.4rem;
+        margin-bottom: 15px;
+    }
+
+    .interaction-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: auto;
+        padding-top: 15px;
+        border-top: 1px solid #cbd5e1;
+    }
+
+    .like-count {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .read-more-link {
+        color: var(--primary-green);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+        .read-more-link:hover {
+            opacity: 0.7;
+            color: var(--primary-green);
+        }
+
+    .filter-panel {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 25px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .owner-controls {
+        padding: 10px;
+    }
+
+    .empty-message {
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: #64748b;
+        gap: 12px;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="filter-panel mb-5">
+        <form method="get" asp-action="Index" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="filter-label fw-bold mb-2">Search Destination</label>
+                <input type="text" name="search" value="@Context.Request.Query["search"]"
+                       class="form-control filter-input border-2" placeholder="Search by name or city..." style="border-radius: 12px; padding: 12px;">
+            </div>
+            <div class="col-md-3">
+                <label class="filter-label fw-bold mb-2">Category</label>
+                <select name="categoryId" class="form-select filter-input border-2" style="border-radius: 12px; padding: 12px;">
+                    <option value="">All Categories</option>
+                    @foreach (var category in ViewBag.Categories)
+                    {
+                        <option value="@category.Id"
+                                selected="@(Context.Request.Query["categoryId"] == category.Id.ToString())">@category.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="search-btn btn btn-success w-100 py-3 fw-bold"
+                        style="border-radius: 12px; background-color: var(--primary-green);">
+                    <i class="fa-solid fa-sliders me-2"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var place in Model)
+            {
+                var coverImage = place.Images?.OrderBy(i => i.SortOrder).FirstOrDefault();
+                var currentUserId = UserManager.GetUserId(User);
+                var isOwner = currentUserId == place.UserId;
+                var isSaved = savedPlaceIds.Contains(place.Id);
+                var isLiked = likedPlaceIds.Contains(place.Id);
+
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="place-card">
+                        <div class="image-wrapper">
+                            <img src="@(coverImage?.ImageUrl ?? "/images/no-image.png")" alt="@place.Name" />
+                            <div class="category-badge">
+                                <i class="fa-solid fa-tag me-1"></i> @(place.Category?.Name ?? "General")
+                            </div>
+                            <div class="action-overlay">
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    <form asp-controller="SavedPlaces" asp-action="Toggle" asp-route-placeId="@place.Id" method="post">
+                                        <button type="submit" class="circle-btn">
+                                            <i class="@(isSaved ? "fa-solid fa-bookmark text-success" : "fa-regular fa-bookmark text-muted")"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+
+                        @if (isOwner)
+                        {
+                            <div class="owner-controls d-flex gap-2">
+                                <a asp-controller="Place" asp-action="Edit" asp-route-id="@place.Id"
+                                   class="btn btn-sm btn-light shadow-sm fw-bold">
+                                    <i class="fa-solid fa-pen text-warning"></i>
+                                </a>
+                                <form asp-controller="Place" asp-action="Delete" asp-route-id="@place.Id"
+                                      method="post" onsubmit="return confirm('Delete this place?');">
+                                    <button class="btn btn-sm btn-light shadow-sm fw-bold">
+                                        <i class="fa-solid fa-trash text-danger"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        }
+
+                        <div class="card-body">
+                            <h5 class="place-title">@place.Name</h5>
+                            <div class="location-text">
+                                <i class="fa-solid fa-location-dot me-1 text-danger"></i> @place.City, @place.Country
+                            </div>
+
+                            <div class="features-list">
+                                <i class="fa-solid fa-star text-warning me-1"></i>
+                                @(string.IsNullOrEmpty(place.FeaturesSerialized) ? "Explore this unique destination." : place.FeaturesSerialized)
+                            </div>
+
+                            <div class="interaction-bar">
+                                <div class="like-count">
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        <form asp-controller="Likes" asp-action="Toggle" asp-route-placeId="@place.Id" method="post">
+                                            <button type="submit" style="border:none; background:none; padding:0;">
+                                                <i class="@(isLiked ? "fa-solid fa-heart text-danger" : "fa-regular fa-heart") fa-lg"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa-regular fa-heart"></i>
+                                    }
+                                    <span>@ViewBag.LikesCounts[place.Id]</span>
+                                </div>
+
+                                <a class="read-more-link" asp-controller="Place" asp-action="Details" asp-route-id="@place.Id">
+                                    View Details <i class="fa-solid fa-chevron-right ms-1" style="font-size: 0.7rem;"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 empty-message">
+                <h4>
+                    <i class="fa-solid fa-map-location-dot me-2"></i> No places are available yet.
+                </h4>
+            </div>
+        }
+    </div>
+</div>

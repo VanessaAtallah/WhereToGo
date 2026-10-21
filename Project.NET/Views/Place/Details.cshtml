@@ -1,0 +1,327 @@
+﻿@model PlaceModel
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<style>
+    :root {
+        --primary-green: #198754;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --accent-mint: #f1fdf4;
+    }
+
+    /* Hero Section */
+    .hero-container {
+        position: relative;
+        border-radius: 25px;
+        overflow: hidden;
+        margin-top: 1rem;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+    }
+
+    .carousel-inner img {
+        height: 480px;
+        object-fit: cover;
+        filter: brightness(0.85);
+    }
+
+    .hero-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 50px 30px 25px;
+        background: linear-gradient(transparent, rgba(0,0,0,0.85));
+        color: white;
+        z-index: 2;
+    }
+
+    /* Content Cards */
+    .detail-card {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #f1f5f9;
+        padding: 1.5rem;
+        height: 100%;
+    }
+
+    /* Features Badges */
+    .feature-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-right: 8px;
+        margin-bottom: 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        background-color: var(--accent-mint);
+        color: var(--primary-green);
+        padding: 8px 16px;
+        border-radius: 50px;
+        border: 1px solid rgba(25, 135, 84, 0.2);
+        transition: all 0.2s ease;
+    }
+
+        .feature-badge:hover {
+            background-color: var(--primary-green);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .feature-badge i {
+            font-size: 0.9rem;
+        }
+
+    /* Sidebar Info Items */
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .info-icon {
+        width: 38px;
+        height: 38px;
+        background: var(--accent-mint);
+        color: var(--primary-green);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        font-size: 1rem;
+    }
+
+    .info-content label {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-content span {
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    /* Social Cards */
+    .social-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .social-card {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 500;
+        color: white;
+        transition: transform 0.25s ease;
+    }
+
+        .social-card.instagram {
+            background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af);
+        }
+
+        .social-card.facebook {
+            background-color: #1877f2;
+        }
+
+        .social-card.website {
+            background-color: #198754;
+        }
+
+        .social-card:hover {
+            transform: translateX(5px);
+            color: white;
+        }
+
+    /* Map */
+    .extra-info {
+        background-color: var(--accent-mint);
+        padding: 20px;
+        border-radius: 15px;
+        margin-top: 20px;
+    }
+
+    .map-container iframe {
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+</style>
+
+<div class="container pb-5 mt-3">
+
+    <div class="mb-3">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-link text-decoration-none text-muted p-0 fw-bold">
+            <i class="fa-solid fa-chevron-left me-1"></i> Back to all places
+        </a>
+    </div>
+
+    <div class="hero-container mb-4">
+        @if (Model.Images != null && Model.Images.Any())
+        {
+            <div id="placeHero" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    @for (int i = 0; i < Model.Images.Count; i++)
+                    {
+                        var img = Model.Images.OrderBy(img => img.SortOrder).ElementAt(i);
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            <img src="@img.ImageUrl" class="d-block w-100" alt="@Model.Name">
+                        </div>
+                    }
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#placeHero" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#placeHero" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+        }
+        <div class="hero-overlay">
+            <h1 class="fw-bold mb-1">@Model.Name</h1>
+            <p class="mb-0 fs-5 opacity-90"><i class="fa-solid fa-location-dot me-1"></i> @Model.City, @Model.Country</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="detail-card">
+                <h5 class="fw-bold mb-3">About this location</h5>
+                <p class="text-muted" style="line-height: 1.7; font-size: 1.05rem;">
+                    @(string.IsNullOrEmpty(Model.Description) ? "Experience the beauty of " + Model.Name + ". No full description is available yet." : Model.Description)
+                </p>
+
+                <h5 class="fw-bold mt-4 mb-3">Features</h5>
+                <div class="mb-2">
+                    @if (!string.IsNullOrEmpty(Model.FeaturesSerialized))
+                    {
+                        var features = Model.FeaturesSerialized.Split(',');
+                        foreach (var feature in features)
+                        {
+                            <span class="feature-badge">
+                                <i class="fa-solid fa-circle-check"></i> @feature.Trim()
+                            </span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted italic">No specific features listed.</span>
+                    }
+                </div>
+
+                <div class="extra-info mt-3">
+                    <strong><i class="fa-solid fa-map-location-dot me-1"></i> Location on Map</strong>
+                    <div class="map-container mt-2">
+                        <iframe width="100%"
+                                height="300"
+                                style="border:0;"
+                                loading="lazy"
+                                allowfullscreen
+                                referrerpolicy="no-referrer-when-downgrade"
+                                src="https://www.google.com/maps?q=@Uri.EscapeDataString(Model.MapLocation)&output=embed">
+                        </iframe>
+    
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="detail-card">
+                <h5 class="fw-bold mb-4">Quick Information</h5>
+
+                <div class="info-item">
+                    <div class="info-icon"><i class="fa-solid fa-calendar-days"></i></div>
+                    <div class="info-content">
+                        <label>Opening Days</label>
+                        <span>
+                            @if (!string.IsNullOrEmpty(Model.OpeningDaysSerialized))
+                            {
+                                var days = Model.OpeningDaysSerialized.Split(',');
+                                foreach (var day in days)
+                                {
+                                    <span class="d-block">@day.Trim()</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted italic">Not specified</span>
+                            }
+                        </span>
+
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon"><i class="fa-solid fa-globe"></i></div>
+                    <div class="info-content">
+                        <label>Open All Year</label>
+                        <span>@(Model.OpenAllYear ? "Yes, available year-round" : "Seasonal / Limited")</span>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon"><i class="fa-solid fa-person-walking"></i></div>
+                    <div class="info-content">
+                        <label>Free Entry</label>
+                        <span>@(Model.FreeEntry ? "Yes, Free Entry" : "Paid Entry Required")</span>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                    <div class="info-content">
+                        <label>Price Range</label>
+                        <span>@(string.IsNullOrEmpty(Model.PriceRange) ? "Contact for details" : Model.PriceRange)</span>
+                    </div>
+                </div>
+
+                <div class="info-item mb-4">
+                    <div class="info-icon"><i class="fa-solid fa-phone"></i></div>
+                    <div class="info-content">
+                        <label>Contact Info</label>
+                        <span>@Model.Contact</span>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <h6 class="fw-bold mb-3">Social & Website</h6>
+                <div class="social-cards">
+                    @if (!string.IsNullOrEmpty(Model.Instagram))
+                    {
+                        <a href="@Model.Instagram" target="_blank" class="social-card instagram">
+                            <i class="fa-brands fa-instagram fa-lg"></i> <span>Instagram</span>
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Facebook))
+                    {
+                        <a href="@Model.Facebook" target="_blank" class="social-card facebook">
+                            <i class="fa-brands fa-facebook fa-lg"></i> <span>Facebook</span>
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Website))
+                    {
+                        <a href="@Model.Website" target="_blank" class="social-card website">
+                            <i class="fa-solid fa-globe fa-lg"></i> <span>Visit Website</span>
+                        </a>
+                    }
+                    @if (string.IsNullOrEmpty(Model.Instagram) && string.IsNullOrEmpty(Model.Facebook) && string.IsNullOrEmpty(Model.Website))
+                    {
+                        <p class="text-muted small">No social links provided.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

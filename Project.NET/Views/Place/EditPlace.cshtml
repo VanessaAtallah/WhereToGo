@@ -1,0 +1,278 @@
+﻿@model PlaceModel
+@{
+    ViewData["Title"] = "Edit Place";
+    var selectedFeatures = (Model.FeaturesSerialized ?? "").Split(",", StringSplitOptions.RemoveEmptyEntries).ToList();
+    var selectedDays = (Model.OpeningDaysSerialized ?? "").Split(",", StringSplitOptions.RemoveEmptyEntries).ToList();
+}
+
+<style>
+    :root {
+        --primary-green: #198754;
+        --border-color: #e2e8f0;
+    }
+
+    /* Main Form Card */
+    .edit-card {
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--border-color);
+        margin-bottom: 50px;
+    }
+
+    .section-title {
+        font-weight: 700;
+        color: var(--primary-green);
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f1fdf4;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Form Controls */
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.1);
+    }
+
+    textarea.form-control {
+        height: 120px;
+    }
+
+    /* Custom Checkbox/Radio Styling */
+    .option-group {
+        background: #fcfcfc;
+        padding: 15px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+    }
+
+    .checkbox-item {
+        padding: 8px 12px;
+        border-radius: 8px;
+        transition: background 0.2s;
+        display: block;
+        cursor: pointer;
+    }
+
+        .checkbox-item:hover {
+            background: #f1fdf4;
+        }
+
+        .checkbox-item input {
+            margin-right: 10px;
+            accent-color: var(--primary-green);
+        }
+
+    /* Image Preview Section */
+    .img-preview-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        background: #f8fafc;
+        padding: 15px;
+        border-radius: 12px;
+        border: 2px dashed #cbd5e1;
+    }
+
+    .preview-thumb {
+        height: 100px;
+        width: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid white;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    /* Submit Button */
+    .btn-update {
+        background-color: #ffc107;
+        color: #000;
+        font-weight: 700;
+        padding: 12px 40px;
+        border-radius: 12px;
+        border: none;
+        transition: all 0.3s;
+    }
+
+        .btn-update:hover {
+            background-color: #ffca2c;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+        }
+</style>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="edit-card">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold">Edit Place Details</h2>
+                    <p class="text-muted">Update the information for <strong>@Model.Name</strong></p>
+                </div>
+
+                <form asp-action="Edit" asp-controller="Place" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+
+                    <h5 class="section-title"><i class="fa-solid fa-circle-info"></i> General Information</h5>
+                    <div class="form-floating mb-3">
+                        <input asp-for="Name" class="form-control" placeholder="Place Name" />
+                        <label asp-for="Name">Place Name</label>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Country" class="form-control" placeholder="Country" />
+                                <label asp-for="Country">Country</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="City" class="form-control" placeholder="City" />
+                                <label asp-for="City">City</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <textarea asp-for="Description" class="form-control" placeholder="Description"></textarea>
+                        <label asp-for="Description">Description</label>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Category</label>
+                        <select asp-for="CategoryId" class="form-select form-select-lg">
+                            <option value="">-- Select Category --</option>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.Id" selected="@(category.Id == Model.CategoryId)">
+                                    @category.Name
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="section-title"><i class="fa-solid fa-star"></i> Features</h5>
+                            <div class="option-group">
+                                <div class="row">
+                                    @foreach (var feature in ViewBag.Features)
+                                    {
+                                        <div class="col-6">
+                                            <label class="checkbox-item">
+                                                <input type="checkbox" name="Features" value="@feature" 
+                                                    checked="@(selectedFeatures.Contains(feature))" /> @feature
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="section-title"><i class="fa-solid fa-clock"></i> Opening Days</h5>
+                            <div class="option-group">
+                                @foreach (var day in ViewBag.DaysOfWeek)
+                                {
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="OpeningDays" value="@day"
+                                            checked="@(selectedDays.Contains(day))" /> @day
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="section-title"><i class="fa-solid fa-wallet"></i> Pricing & Status</h5>
+                    <div class="option-group mb-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-6 border-end">
+                                <label class="fw-bold mb-2 d-block text-muted">Price Range</label>
+                                <div class="d-flex gap-3">
+                                    <label class="checkbox-item"><input type="radio" asp-for="PriceRange" value="Cheap" /> Cheap</label>
+                                    <label class="checkbox-item"><input type="radio" asp-for="PriceRange" value="Medium" /> Medium</label>
+                                    <label class="checkbox-item"><input type="radio" asp-for="PriceRange" value="Expensive" /> Expensive</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 ps-md-4">
+                                <label class="fw-bold mb-2 d-block text-muted">Availability</label>
+                                <div class="form-check form-switch mb-2">
+                                    <input asp-for="FreeEntry" class="form-check-input" type="checkbox" />
+                                    <label asp-for="FreeEntry" class="form-check-label">Free Entry</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input asp-for="OpenAllYear" class="form-check-input" type="checkbox" />
+                                    <label asp-for="OpenAllYear" class="form-check-label">Open All Year</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="section-title"><i class="fa-solid fa-link"></i> Contact & Socials</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Contact" type="tel" class="form-control" placeholder="Contact" />
+                                <label asp-for="Contact">Contact Number</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input asp-for="MapLocation" class="form-control" />
+                                <label asp-for="MapLocation">Google Map</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Instagram" class="form-control" placeholder="Instagram" />
+                                <label asp-for="Instagram">Instagram Profile URL</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input asp-for="Facebook" class="form-control" placeholder="Facebook" />
+                                <label asp-for="Facebook">Facebook Page URL</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-floating mb-4">
+                        <input asp-for="Website" class="form-control" placeholder="Website" />
+                        <label asp-for="Website">Official Website URL</label>
+                    </div>
+
+                    <h5 class="section-title"><i class="fa-solid fa-image"></i> Media Gallery</h5>
+                    <div class="mb-4">
+                        <label class="form-label text-muted fw-bold">Existing Images</label>
+                        <div class="img-preview-container">
+                            @if (Model.Images != null && Model.Images.Count > 0)
+                            {
+                                foreach (var img in Model.Images)
+                                {
+                                    <img src="@img.ImageUrl" class="preview-thumb" alt="Place Image" />
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted m-0 p-2">No images uploaded yet.</p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="form-label fw-bold">Upload New Images</label>
+                        <input type="file" name="Images" multiple class="form-control form-control-lg" />
+                        <small class="text-muted"><i class="fa-solid fa-circle-info"></i> 
+                            Selecting new files will be added to your current collection.</small>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-update">
+                            <i class="fa-solid fa-rotate me-2"></i> Update Place
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

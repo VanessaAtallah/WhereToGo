@@ -1,0 +1,392 @@
+﻿@model PlaceModel
+@{
+    ViewData["Title"] = "Add New Place";
+}
+
+<style>
+    :root {
+        --primary-green: #157347;
+        --light-mint: #f0f9f4;
+        --border-color: #e2e8f0;
+        --text-muted: #64748b;
+        --bg-subtle: #f8fafc;
+    }
+
+    .form-container {
+        max-width: 900px;
+        margin: 2rem auto;
+    }
+
+    .card {
+        border-radius: 24px;
+        border: none;
+        background: #ffffff;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    .card-body {
+        padding: 3rem;
+    }
+
+    /* Section Headers */
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 2rem 0 1.5rem 0;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--light-mint);
+        color: #334155;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+        .section-header i {
+            color: var(--primary-green);
+            background: var(--light-mint);
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+    /* Input*/
+    .form-floating > .form-control,
+    .form-floating > .form-select {
+        border: 2px solid var(--border-color);
+        border-radius: 14px;
+        background-color: var(--bg-subtle);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 4px rgba(21, 115, 71, 0.1);
+        background-color: #fff;
+    }
+
+    /* Feature Grid (Icon on Top) */
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 15px;
+    }
+
+    .feature-checkbox {
+        display: none;
+    }
+
+    .feature-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 10px;
+        border-radius: 20px;
+        border: 2px solid var(--border-color);
+        background: #fff;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+        min-height: 110px;
+    }
+
+        .feature-box i {
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+
+        .feature-box span {
+            font-size: 0.85rem;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+    .feature-checkbox:checked + .feature-box {
+        background-color: var(--light-mint);
+        border-color: currentColor;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+    }
+
+    /* Action Button */
+    .btn-submit {
+        background: linear-gradient(135deg, #157347 0%, #2ecc71 100%);
+        border: none;
+        border-radius: 15px;
+        padding: 15px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: white;
+        box-shadow: 0 10px 25px rgba(21, 115, 71, 0.25);
+        transition: all 0.3s ease;
+    }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(21, 115, 71, 0.35);
+        }
+
+    /* Colors for Specific Features */
+    .feature-family {
+        color: #27ae60;
+    }
+
+    .feature-romantic {
+        color: #d63384;
+    }
+
+    .feature-quiet {
+        color: #475569;
+    }
+
+    .feature-wifi {
+        color: #3182ce;
+    }
+
+    .feature-parking {
+        color: #d97706;
+    }
+
+    .feature-pets {
+        color: #e67e22;
+    }
+
+    .feature-tours {
+        color: #059669;
+    }
+
+    .feature-study {
+        color: #6366f1;
+    }
+
+    .feature-outdoor {
+        color: #0891b2;
+    }
+
+    .feature-wheelchair {
+        color: #e53e3e;
+    }
+</style>
+
+<div class="form-container">
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <h2 class="mb-4 fw-bold">Add a New Place</h2>
+            <p class="text-muted mb-5">Share a new destination with the community. Fill in the details below.</p>
+
+            <form asp-controller="Place" asp-action="Create" method="post" enctype="multipart/form-data">
+
+                <div class="section-header">
+                    <i class="fa-solid fa-circle-info"></i> Basic Information
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Name" class="form-control" placeholder="Place Name" />
+                    <label asp-for="Name">Place Name</label>
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-floating">
+                            <input asp-for="Country" class="form-control" placeholder="Country" />
+                            <label asp-for="Country">Country</label>
+                            <span asp-validation-for="Country" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-floating">
+                            <input asp-for="City" class="form-control" placeholder="City" />
+                            <label asp-for="City">City</label>
+                            <span asp-validation-for="City" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <textarea asp-for="Description" class="form-control" placeholder="Description" style="height: 120px"></textarea>
+                    <label asp-for="Description">Tell us about this place...</label>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <select asp-for="CategoryId" class="form-select">
+                        <option value="">Choose a category</option>
+                        @foreach (var category in ViewBag.Categories)
+                        {
+                            <option value="@category.Id">@category.Name</option>
+                        }
+                    </select>
+                    <label asp-for="CategoryId">Category</label>
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+
+
+                <div class="section-header">
+                    <i class="fa-solid fa-camera"></i> Photos & Social
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Upload Images</label>
+                    <input type="file" name="Images" class="form-control" multiple accept="image/*" />
+                    <div class="form-text">You can select multiple photos at once.</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="form-floating">
+                            <input asp-for="Instagram" class="form-control" placeholder="Instagram" />
+                            <label><i class="fa-brands fa-instagram text-danger"></i> Instagram</label>
+                            <span asp-validation-for="Instagram" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="form-floating">
+                            <input asp-for="Facebook" class="form-control" placeholder="Facebook" />
+                            <label><i class="fa-brands fa-facebook text-primary"></i> Facebook</label>
+                            <span asp-validation-for="Facebook" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="form-floating">
+                            <input asp-for="Website" class="form-control" placeholder="Website" />
+                            <label><i class="fa-solid fa-globe text-secondary"></i> Website</label>
+                            <span asp-validation-for="Website" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Features & Vibes
+                </div>
+
+                <div class="feature-grid mb-4">
+                    @foreach (var feature in ViewBag.Features as List<string>)
+                    {
+                        var id = "feature_" + feature.Replace(" ", "");
+                        <div class="feature-item">
+                            <input type="checkbox" name="Features" value="@feature" id="@id" class="feature-checkbox" />
+                            <label for="@id" class="feature-box @GetFeatureClass(feature)">
+                                <i class="@GetFeatureIcon(feature)"></i>
+                                <span>@feature</span>
+                            </label>
+                        </div>
+                    }
+                </div>
+
+                <div class="form-check form-switch mb-2">
+                    <input asp-for="FreeEntry" class="form-check-input" type="checkbox" />
+                    <label asp-for="FreeEntry" class="form-check-label fw-semibold">
+                        <i class="fa-solid fa-dollar-sign text-success"></i> Free Entry</label>
+                </div>
+                <div class="form-check form-switch mb-4">
+                    <input asp-for="OpenAllYear" class="form-check-input" type="checkbox" />
+                    <label asp-for="OpenAllYear" class="form-check-label fw-semibold">
+                        <i class="fa-solid fa-calendar-check text-primary"></i> Open All Year</label>
+                </div>
+
+                <div class="section-header">
+                    <i class="fa-solid fa-clock"></i> Practical Details
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-4">
+                        <label class="form-label fw-bold">Price Level</label>
+                        <div class="d-flex gap-4 ps-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="PriceRange" value="Cheap" id="p1" />
+                                <label class="form-check-label fw-semibold" for="p1">Cheap</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="PriceRange" value="Medium" id="p2" />
+                                <label class="form-check-label fw-semibold" for="p2">Medium</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="PriceRange" value="Expensive" id="p3" />
+                                <label class="form-check-label fw-semibold" for="p3">Expensive</label>
+                            </div>
+
+                            <span asp-validation-for="PriceRange" class="text-danger ms-2"></span>
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-12 mb-4">
+                        <label class="form-label fw-bold">Opening Days</label>
+                        <div class="ps-2">
+                            @foreach (var day in ViewBag.DaysOfWeek as List<string>)
+                            {
+                                <div class="form-check form-check-inline me-3">
+                                    <input type="checkbox" name="OpeningDays" value="@day" class="form-check-input" id="day_@day" />
+                                    <label class="form-check-label" for="day_@day">@day</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-floating">
+                            <input asp-for="Contact" type="tel" class="form-control" placeholder="Contact" />
+                            <label asp-for="Contact"><i class="fa-solid fa-phone"></i> Contact Number</label>
+                            <div class="form-text">
+                                Example: <strong>+96171234567</strong> or <strong>71234567</strong>
+                            </div>
+                            <span asp-validation-for="Contact" class="text-danger ms-2"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-floating">
+                            <input asp-for="MapLocation" class="form-control" placeholder="Google Map" />
+                            <label asp-for="MapLocation"><i class="fa-solid fa-map-location-dot"></i> Google Maps</label>
+                            <div class="form-text">
+                                Example: <strong>Beirut Downtown</strong> 
+                            </div>
+                            <span asp-validation-for="MapLocation" class="text-danger ms-2"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-submit w-100 mt-3">
+                    <i class="fa-solid fa-plus me-2"></i> Add Place
+                </button>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetFeatureIcon(string feature) => feature switch
+    {
+        "Family-Friendly" => "fa-solid fa-people-group",
+        "Romantic" => "fa-solid fa-heart",
+        "Quiet" => "fa-solid fa-volume-xmark",
+        "Wi-Fi" => "fa-solid fa-wifi",
+        "Parking" => "fa-solid fa-square-parking",
+        "Pets Allowed" => "fa-solid fa-dog",
+        "Guided Tours" => "fa-solid fa-route",
+        "Good for studying" => "fa-solid fa-book-open",
+        "Outdoor seating" => "fa-solid fa-umbrella-beach",
+        "Wheelchair accessible" => "fa-solid fa-wheelchair",
+        _ => "fa-solid fa-check"
+    };
+
+    string GetFeatureClass(string feature) => feature switch
+    {
+        "Family-Friendly" => "feature-family",
+        "Romantic" => "feature-romantic",
+        "Quiet" => "feature-quiet",
+        "Wi-Fi" => "feature-wifi",
+        "Parking" => "feature-parking",
+        "Pets Allowed" => "feature-pets",
+        "Guided Tours" => "feature-tours",
+        "Good for studying" => "feature-study",
+        "Outdoor seating" => "feature-outdoor",
+        "Wheelchair accessible" => "feature-wheelchair",
+        _ => ""
+    };
+}

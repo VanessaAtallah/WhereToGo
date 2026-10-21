@@ -1,0 +1,192 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
+@model List<PlaceModel>
+@{
+    ViewData["Title"] = "My Saved Places";
+}
+
+<style>
+    :root {
+        --primary-green: #198754;
+        --dark-green: #157347;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+    }
+
+    .saved-container {
+        padding-top: 2rem;
+        padding-bottom: 4rem;
+    }
+
+    .section-header {
+        margin-bottom: 2.5rem;
+        border-left: 5px solid var(--primary-green);
+        padding-left: 15px;
+    }
+
+    /* Card */
+    .place-card {
+        background: #ffffff;
+        border-radius: 20px;
+        border: 1px solid #f1f5f9;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+        .place-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+        }
+
+    .image-wrapper {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+    }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+    .place-card:hover .image-wrapper img {
+        transform: scale(1.1);
+    }
+
+    .category-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--primary-green);
+        padding: 5px 14px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        z-index: 2;
+    }
+
+    .card-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .card-content h5 {
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+        }
+
+    .location-text {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+    }
+
+        .location-text i {
+            color: #dc3545;
+            margin-right: 5px;
+        }
+
+   
+    .btn-details {
+        background-color: var(--primary-green);
+        color: white;
+        border-radius: 12px;
+        font-weight: 600;
+        padding: 12px;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+        .btn-details i {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-details:hover {
+            background-color: var(--dark-green);
+            color: white;
+            box-shadow: 0 4px 15px rgba(25, 135, 84, 0.4);
+        }
+
+            .btn-details:hover i {
+                transform: translateX(5px);
+            }
+
+
+</style>
+
+<div class="container saved-container">
+    <div class="section-header">
+        <h2 class="fw-bold m-0">My Saved Places</h2>
+        <p class="text-muted">Explore your curated collection of destinations</p>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty-state">
+            <i class="fa-regular fa-bookmark fa-3x mb-3 text-muted"></i>
+            <h4 class="fw-bold text-dark">No saved places yet</h4>
+            <p class="text-muted">Start exploring and save places you want to visit.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-success px-4 rounded-pill mt-2">
+                Discover Places
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var place in Model)
+            {
+                var coverImage = place.Images?.OrderBy(i => i.SortOrder).FirstOrDefault();
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="place-card">
+                        <div class="image-wrapper">
+                            @if (place.Category != null)
+                            {
+                                <span class="category-badge">
+                                    <i class="fa-solid fa-tag me-1"></i> @place.Category.Name
+                                </span>
+                            }
+                            <img src="@(coverImage?.ImageUrl ?? "/images/no-image.png")" alt="@place.Name" />
+                        </div>
+
+                        <div class="card-content">
+                            <h5>@place.Name</h5>
+                            <p class="location-text">
+                                <i class="fa-solid fa-location-dot"></i> @place.City, @place.Country
+                            </p>
+
+                            <div class="mt-auto">
+                                <a asp-controller="Place"
+                                   asp-action="Details"
+                                   asp-route-id="@place.Id"
+                                   class="btn btn-details">
+                                    View Details <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

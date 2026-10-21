@@ -1,0 +1,48 @@
+﻿@model LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header text-center bg-success text-white">
+                    <h3 class="my-2"><i class="fas fa-map-pin"></i> Where To Go?</h3>
+                    <small>Share the places you've visited, inspire others!</small>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Login" method="post">
+                        <!-- Shows "Invalid login attempt" and the lockout message -->
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <input type="hidden" asp-for="ReturnUrl" />
+
+                        <!--Email-->
+                        <div class="form-floating mb-3">
+                            <input asp-for="Email" class="form-control" placeholder="Email" />
+                            <label asp-for="Email"><i class="fas fa-envelope"></i> Email</label>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <!--Password-->
+                        <div class="form-floating mb-3">
+                            <input asp-for="Password" class="form-control" placeholder="Password" />
+                            <label asp-for="Password"><i class="fas fa-lock"></i> Password</label>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <!--Submit Button-->
+                        <div class="d-grid mb-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </button>
+                            <p class="text-center text-muted small mt-3">
+                                Don't have an account? <a asp-action="Register">Sign up here</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
